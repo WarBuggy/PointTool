@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using PointTool.Utilities;
 using PointTool.Validation;
 
 namespace PointTool.Managers;
@@ -7,18 +8,11 @@ public class ClassManager
 {
     public const string ClassInfoFileName = "classInfo.json";
 
-    private readonly HashSet<string> classes = [];
+    private readonly Dictionary<string, ClassInfo> classes = [];
 
-    public IReadOnlyCollection<string> Classes => classes;
+    public IReadOnlyDictionary<string, ClassInfo> Classes => classes;
 
-    readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true
-    };
-
-    public ClassManager()
-    {
-    }
+    public ClassManager() { }
 
     public void Refresh()
     {
@@ -38,7 +32,19 @@ public class ClassManager
                 continue;
             }
 
-            classes.Add(normalizedName);
+            if (!TryGetClassInfo(
+                    directory,
+                    out ClassInfo classInfo))
+            {
+                classInfo = CreateClassInfoFile(
+                    directory,
+                    folderName,
+                    string.Empty);
+            }
+
+            classes.Add(
+                normalizedName,
+                classInfo);
         }
     }
 
@@ -46,7 +52,7 @@ public class ClassManager
         string name,
         string description)
     {
-        if (Classes.Contains(name))
+        if (Classes.ContainsKey(name))
         {
             return new CreateClassResult
             {
@@ -63,20 +69,7 @@ public class ClassManager
 
             Directory.CreateDirectory(classDirectory);
 
-            ClassInfo classInfo = new()
-            {
-                Description = description
-            };
-
-            string json = JsonSerializer.Serialize(
-                classInfo,
-                JsonOptions);
-
-            File.WriteAllText(
-                Path.Combine(
-                    classDirectory,
-                    ClassInfoFileName),
-                json);
+            CreateClassInfoFile(classDirectory, name, description);
 
             Refresh();
 
@@ -96,8 +89,79 @@ public class ClassManager
         }
     }
 
+    private ClassInfo CreateClassInfoFile(
+        string classDirectory,
+        string name,
+        string description)
+    {
+        ClassInfo classInfo = new()
+        {
+            Name = name,
+            Description = description
+        };
+
+        string json = JsonSerializer.Serialize(
+            classInfo,
+            JsonOptions.Options);
+
+        File.WriteAllText(
+            Path.Combine(
+                classDirectory,
+                ClassInfoFileName),
+            json);
+
+        return classInfo;
+    }
+
+    public bool TryGetClassInfo(
+        string className,
+        out ClassInfo classInfo)
+    {
+        classInfo = new ClassInfo();
+
+        string classDirectory = Path.Combine(
+            PathManager.GetDataDirectory(),
+            className);
+
+        string filePath = Path.Combine(
+            classDirectory,
+            ClassInfoFileName);
+
+        if (!File.Exists(filePath))
+        {
+            return false;
+        }
+
+        try
+        {
+            string json = File.ReadAllText(filePath);
+
+            ClassInfo? loadedClassInfo =
+                JsonSerializer.Deserialize<ClassInfo>(
+                    json, JsonOptions.Options);
+
+            if (loadedClassInfo is null)
+            {
+                return false;
+            }
+
+            classInfo = loadedClassInfo;
+
+            return true;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+    }
+
     public class ClassInfo
     {
+        public string Name { get; init; } = string.Empty;
         public string Description { get; init; } = string.Empty;
     }
 

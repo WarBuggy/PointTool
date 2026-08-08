@@ -5,6 +5,7 @@ using PointTool.Settings;
 using PointTool.Panes.Work;
 using PointTool.Panes.Left;
 using PointTool.Enums;
+using PointTool.Panes.Right;
 
 namespace PointTool;
 
@@ -26,7 +27,7 @@ public class MainForm : Form
         UIUtilities.CreateTable(columns: 1, rows: 4);
 
     private readonly TableLayoutPanel rightPane =
-        UIUtilities.CreateTable(columns: 1, rows: 1);
+        UIUtilities.CreateTable(columns: 1, rows: 2);
 
     private readonly WorkArea workArea = new();
 
@@ -38,6 +39,7 @@ public class MainForm : Form
 
     private readonly ClassExplorer classExplorer;
 
+    private readonly ClassMetaPane classMetaPane = new();
     private readonly Dictionary<Type, WorkPane> workPanes = [];
 
     public MainForm()
@@ -52,12 +54,10 @@ public class MainForm : Form
 
         InitializeComponent();
 
-        workPanes.Add(typeof(AddClassPane), new AddClassPane(classManager));
-        workPanes.Add(typeof(UploadScorePane), new UploadScorePane());
+        CreateWorkPane();
 
         CreateLeftPane();
     }
-
 
     private void InitializeComponent()
     {
@@ -130,13 +130,59 @@ public class MainForm : Form
             3);
 
         //
+        // rightPane
+        //
+        TableLayoutPanel topRightTable =
+            UIUtilities.CreateTable(columns: 2, rows: 1);
+        topRightTable.AutoSize = false;
+        topRightTable.Dock = DockStyle.Fill;
+        topRightTable.ColumnStyles.Clear();
+        topRightTable.ColumnStyles.Add(
+            new ColumnStyle(SizeType.Percent, 50f));
+        topRightTable.ColumnStyles.Add(
+            new ColumnStyle(SizeType.Percent, 50f));
+        topRightTable.Controls.Add(
+            classMetaPane,
+            0,
+            0);
+        topRightTable.Controls.Add(
+            new Panel(),
+            1,
+            0);
+
+        rightPane.AutoSize = false;
+        rightPane.Dock = DockStyle.Fill;
+        rightPane.RowStyles.Clear();
+        rightPane.RowStyles.Add(
+            new RowStyle(SizeType.Percent, 20f));
+
+        rightPane.RowStyles.Add(
+            new RowStyle(SizeType.Percent, 80f));
+
+        rightPane.Controls.Add(
+            topRightTable,
+            0,
+            0);
+        rightPane.Controls.Add(
+            new Panel(),
+            0,
+            1);
+
+        //
         // rootTable
         //
+        rootTable.AutoSize = false;
+        rootTable.Dock = DockStyle.Fill;
+
         rootTable.RowStyles.Clear();
         rootTable.RowStyles.Add(
             new RowStyle(SizeType.Percent, 67f));
         rootTable.RowStyles.Add(
             new RowStyle(SizeType.Percent, 33f));
+
+
+        topTable.AutoSize = false;
+        topTable.Dock = DockStyle.Fill;
 
         topTable.ColumnStyles.Clear();
         topTable.ColumnStyles.Add(
@@ -207,6 +253,14 @@ public class MainForm : Form
         //
     }
 
+    private void CreateWorkPane()
+    {
+        workPanes.Add(typeof(AddClassPane), new AddClassPane(classManager));
+        workPanes.Add(typeof(UploadScorePane), new UploadScorePane(quizManager));
+        GetWorkPane<UploadScorePane>().QuizCreated += UploadScorePane_QuizCreated;
+
+    }
+
     private void CreateLeftPane()
     {
 
@@ -222,9 +276,6 @@ public class MainForm : Form
     {
         classButtonSet.UploadScoreButton.Click +=
             UploadQuizButton_Click;
-
-        classExplorer.SelectionChanged +=
-            ClassExplorer_SelectionChanged;
     }
 
     private void CreateButton_Click(
@@ -238,9 +289,9 @@ public class MainForm : Form
         object? sender,
         EventArgs e)
     {
-        UploadScorePane uploadQuizPane = GetWorkPane<UploadScorePane>();
+        UploadScorePane uploadScorePane = GetWorkPane<UploadScorePane>();
 
-        uploadQuizPane.ClassName = classExplorer.SelectedClassName;
+        uploadScorePane.ClassName = classExplorer.SelectedClassName;
 
         ShowWorkPane<UploadScorePane>();
     }
@@ -254,6 +305,13 @@ public class MainForm : Form
         classExplorer.RefreshTree();
     }
 
+    private void UploadScorePane_QuizCreated(
+        object? sender,
+        EventArgs e)
+    {
+        RefreshData();
+    }
+
     private void ClassExplorer_SelectionChanged(
         object? sender,
         EventArgs e)
@@ -263,10 +321,27 @@ public class MainForm : Form
             case ClassExplorerSelectionType.Class:
                 leftActionArea.ShowButtons(
                     classButtonSet.Buttons);
+
+                ShowClassInfo(
+                    classManager.Classes[
+                        classExplorer.SelectedClassName]);
+
+                break;
+
+            case ClassExplorerSelectionType.Quiz:
+                leftActionArea.ClearAll();
+
+                ShowClassInfo(
+                    classManager.Classes[
+                        classExplorer.SelectedClassName]);
+
                 break;
 
             default:
                 leftActionArea.ClearAll();
+
+                HideClassInfo();
+
                 break;
         }
     }
@@ -274,5 +349,17 @@ public class MainForm : Form
     private T GetWorkPane<T>() where T : WorkPane
     {
         return (T)workPanes[typeof(T)];
+    }
+
+    private void ShowClassInfo(
+        ClassManager.ClassInfo classInfo)
+    {
+        classMetaPane.SetData(classInfo);
+        classMetaPane.SetVisible(true);
+    }
+
+    private void HideClassInfo()
+    {
+        classMetaPane.SetVisible(false);
     }
 }

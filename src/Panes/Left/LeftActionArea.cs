@@ -36,6 +36,8 @@ public class LeftActionArea : TableLayoutPanel
         }
 
         ResumeLayout(false);
+
+        ClearAll();
     }
 
     public void ShowButtons(
@@ -43,16 +45,14 @@ public class LeftActionArea : TableLayoutPanel
     {
         Controls.Clear();
 
-        int maxButtonCount = RowCountValue * RowCountValue;
+        int maxButtonCount = RowCountValue * ColumnCountValue;
         for (int i = 0; i < maxButtonCount; i++)
         {
             Control control;
 
             if (i < buttons.Count)
             {
-                Button button = buttons[i];
-                button.Dock = DockStyle.Fill;
-                control = button;
+                control = buttons[i];
             }
             else
             {
@@ -65,13 +65,13 @@ public class LeftActionArea : TableLayoutPanel
 
             Controls.Add(
                 control,
-                i % 2,
-                i / 2);
+                i % ColumnCountValue,
+                i / ColumnCountValue);
         }
     }
 
     public void ClearAll()
     {
-        Controls.Clear();
+        ShowButtons([]);
     }
 }

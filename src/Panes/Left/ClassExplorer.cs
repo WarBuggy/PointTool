@@ -1,5 +1,6 @@
 using PointTool.Enums;
 using PointTool.Managers;
+using static PointTool.Managers.QuizManager;
 
 namespace PointTool.Panes.Left;
 
@@ -55,14 +56,16 @@ public class ClassExplorer : UserControl
 
         treeView.Nodes.Clear();
 
-        foreach (string className in classManager.Classes)
+        foreach (string className in classManager.Classes.Keys)
         {
             TreeNode classNode =
                 treeView.Nodes.Add(className);
 
-            foreach (string quizName in quizManager.GetQuizzes(className))
+            foreach (QuizInfo quizInfo in
+                quizManager.GetQuizzes(className))
             {
-                classNode.Nodes.Add(quizName);
+                classNode.Nodes.Add(
+                    quizInfo.Name);
             }
         }
 

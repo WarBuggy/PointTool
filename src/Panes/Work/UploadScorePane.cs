@@ -1,4 +1,5 @@
 using PointTool.InputGroups;
+using PointTool.Managers;
 using PointTool.Utilities;
 using PointTool.Validation;
 
@@ -6,6 +7,8 @@ namespace PointTool.Panes.Work;
 
 public class UploadScorePane : WorkPane
 {
+    private readonly QuizManager quizManager;
+
     private const string NameKey = "Name";
 
     private const string DescriptionKey = "Description";
@@ -37,8 +40,12 @@ public class UploadScorePane : WorkPane
         set => className = value;
     }
 
-    public UploadScorePane()
+    public event EventHandler? QuizCreated;
+
+    public UploadScorePane(QuizManager quizManager)
     {
+        this.quizManager = quizManager;
+
         AddInputGroup(
             nameGroup,
             row: 0,
@@ -137,14 +144,71 @@ public class UploadScorePane : WorkPane
         string description =
             result.GetValue<string>(DescriptionKey);
 
-        // TODO:
-        // Upload the scores.
+        List<QuizScore> scores = CreateTestScores();
 
         Form? owner = ContentTable.FindForm();
 
-        UIUtilities.ShowMessage(
-            "Upload Scores",
-            "Quiz score upload is not implemented yet.",
-            owner);
+        try
+        {
+            quizManager.CreateQuizScoreFile(
+                ClassName,
+                name,
+                description,
+                scores);
+
+            UIUtilities.ShowMessage(
+                "Upload Scores",
+                $"Quiz \"{name}\" was uploaded successfully.",
+                owner);
+
+            QuizCreated?.Invoke(
+                this,
+                EventArgs.Empty);
+        }
+        catch (IOException ex)
+        {
+            UIUtilities.ShowMessage(
+                "Upload Scores",
+                ex.Message,
+                owner);
+        }
+    }
+
+    private static List<QuizScore> CreateTestScores()
+    {
+        string[] students =
+        [
+            "Alice",
+            "Bob",
+            "Charlie",
+            "Diana",
+            "Ethan",
+            "Fiona",
+            "George",
+            "Hannah",
+            "Ian",
+            "Julia",
+        ];
+
+        Random random = new();
+
+        int studentCount =
+            random.Next(1, students.Length + 1);
+
+        return [.. students
+            .OrderBy(_ => random.Next())
+            .Take(studentCount)
+            .Select(student => new QuizScore
+            {
+                Student = student,
+                Score = random.Next(0, 21)
+            })];
+    }
+
+    public class QuizScore
+    {
+        public string Student { get; init; } = string.Empty;
+
+        public int Score { get; init; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using PointTool.Settings;
+using PointTool.Utilities;
 
 namespace PointTool.Managers;
 
@@ -8,11 +9,6 @@ public class SettingManager
     private const string SettingFileName = "settings.json";
 
     private readonly Dictionary<Setting, object?> currentSettings = [];
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true
-    };
 
     public SettingManager()
     {
@@ -138,7 +134,7 @@ public class SettingManager
     {
         string json = JsonSerializer.Serialize(
             settings,
-            JsonOptions);
+            JsonOptions.Options);
 
         File.WriteAllText(
             GetSettingFilePath(),
