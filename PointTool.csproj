@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ImplicitUsings>enable</ImplicitUsings>
+
+		<StartupScenario>Basic</StartupScenario>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(StartupScenario)' != 'NoDataFolder'">
+		<TestDataFiles Include="TestData\$(StartupScenario)\Data\**\*" />
+	</ItemGroup>
+
+	<Target Name="DeployStartupScenario" AfterTargets="Build">
+
+		<!-- Delete existing test data -->
+		<RemoveDir Directories="$(TargetDir)Data" />
+
+		<!-- Create an empty Data folder -->
+		<MakeDir Condition="'$(StartupScenario)' == 'EmptyDataFolder'" Directories="$(TargetDir)Data" />
+
+		<!-- Copy selected test data -->
+		<Exec Condition="'$(StartupScenario)' != 'NoDataFolder' and '$(StartupScenario)' != 'EmptyDataFolder'" Command="xcopy /E /I /Y &quot;TestData\$(StartupScenario)&quot; &quot;$(TargetDir)&quot;" />
+
+	</Target>
+
+</Project>

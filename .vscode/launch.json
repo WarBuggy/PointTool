@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "PointTool (Basic)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build (Basic)",
+            "program": "${workspaceFolder}/bin/Debug/net8.0-windows/PointTool.exe",
+            "cwd": "${workspaceFolder}/bin/Debug/net8.0-windows",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "PointTool (EmptyDataFolder)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build (EmptyDataFolder)",
+            "program": "${workspaceFolder}/bin/Debug/net8.0-windows/PointTool.exe",
+            "cwd": "${workspaceFolder}/bin/Debug/net8.0-windows",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "PointTool (NoDataFolder)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build (NoDataFolder)",
+            "program": "${workspaceFolder}/bin/Debug/net8.0-windows/PointTool.exe",
+            "cwd": "${workspaceFolder}/bin/Debug/net8.0-windows",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}
