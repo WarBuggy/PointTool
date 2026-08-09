@@ -1,6 +1,5 @@
 using System.Text.Json;
 using PointTool.Utilities;
-using PointTool.Validation;
 using static PointTool.Managers.ClassManager;
 using static PointTool.Panes.Work.UploadScorePane;
 
@@ -26,6 +25,12 @@ public class QuizManager(ClassManager classManager)
 
             foreach (QuizInfo quizInfo in quizList)
             {
+                quizInfo.Scores.Sort(
+                    (a, b) => string.Compare(
+                        a.Student,
+                        b.Student,
+                        StringComparison.OrdinalIgnoreCase));
+
                 UpdateQuizStats(quizInfo);
             }
 
@@ -122,7 +127,7 @@ public class QuizManager(ClassManager classManager)
                 Path.GetFileName(file);
 
             if (fileName.Equals(
-                ClassManager.ClassInfoFileName,
+                ClassInfoFileName,
                 StringComparison.OrdinalIgnoreCase))
             {
                 continue;

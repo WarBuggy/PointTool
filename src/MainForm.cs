@@ -45,6 +45,10 @@ public class MainForm : Form
 
     private readonly QuizMetaPane quizMetaPane = new();
 
+    private readonly DetailArea detailArea = new();
+
+    private readonly QuizScorePane quizScorePane = new();
+
     private readonly Dictionary<Type, WorkPane> workPanes = [];
 
     public MainForm()
@@ -159,17 +163,17 @@ public class MainForm : Form
         rightPane.Dock = DockStyle.Fill;
         rightPane.RowStyles.Clear();
         rightPane.RowStyles.Add(
-            new RowStyle(SizeType.Percent, 30f));
+            new RowStyle(SizeType.Percent, 23f));
 
         rightPane.RowStyles.Add(
-            new RowStyle(SizeType.Percent, 70f));
+            new RowStyle(SizeType.Percent, 77f));
 
         rightPane.Controls.Add(
             topRightTable,
             0,
             0);
         rightPane.Controls.Add(
-            new Panel(),
+            detailArea,
             0,
             1);
 
@@ -341,6 +345,7 @@ public class MainForm : Form
             case ClassExplorerSelectionType.Class:
                 leftActionArea.ShowButtons(
                     classButtonSet.Buttons);
+                detailArea.Clear();
 
                 ShowClassInfo(
                     classManager.Classes[
@@ -357,19 +362,13 @@ public class MainForm : Form
                     classManager.Classes[
                         classExplorer.SelectedClassName]);
 
-                QuizInfo? quizInfo = quizManager.GetQuiz(
-                    classExplorer.SelectedClassName,
-                    classExplorer.SelectedName);
-
-                if (quizInfo is not null)
-                {
-                    ShowQuizInfo(quizInfo);
-                }
+                ShowQuizData();
 
                 break;
 
             default:
                 leftActionArea.ClearAll();
+                detailArea.Clear();
 
                 HideClassInfo();
                 HideQuizInfo();
@@ -403,5 +402,28 @@ public class MainForm : Form
     private void HideQuizInfo()
     {
         quizMetaPane.SetVisible(false);
+    }
+
+    private void ShowQuizData()
+    {
+        QuizInfo? quizInfo =
+            quizManager.GetQuizzes(
+                classExplorer.SelectedClassName)
+            .FirstOrDefault(quiz =>
+                quiz.Name.Equals(
+                    classExplorer.SelectedName,
+                    StringComparison.OrdinalIgnoreCase));
+
+        if (quizInfo is null)
+        {
+            return;
+        }
+
+        ShowQuizInfo(quizInfo);
+
+        quizScorePane.SetData(quizInfo);
+
+        detailArea.ShowDisplayPane(
+            quizScorePane);
     }
 }

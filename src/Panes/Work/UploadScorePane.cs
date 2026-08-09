@@ -188,12 +188,46 @@ public class UploadScorePane : WorkPane
             "Hannah",
             "Ian",
             "Julia",
+            "Kevin",
+            "Laura",
+            "Michael",
+            "Natalie",
+            "Oliver",
+            "Penelope",
+            "Quinn",
+            "Rachel",
+            "Samuel",
+            "Tara",
+            "Victor",
+            "Wendy",
+            "Xavier",
+            "Yvonne",
+            "Zachary",
+            "Aaron",
+            "Bella",
+            "Caleb",
+            "Delilah",
+            "Elijah",
+            "Grace",
+            "Henry",
+            "Isla",
+            "Jack",
+            "Katherine",
+            "Liam",
+            "Maya",
+            "Noah",
+            "Olivia",
+            "Peter",
         ];
+
+        int minStudentCount = 30;
 
         Random random = new();
 
         int studentCount =
-            random.Next(1, students.Length + 1);
+            random.Next(
+                minStudentCount,
+                students.Length + 1);
 
         return [.. students
             .OrderBy(_ => random.Next())
