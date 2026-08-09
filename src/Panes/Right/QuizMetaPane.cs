@@ -1,41 +1,43 @@
 using System.Reflection;
 using PointTool.Utilities;
-using static PointTool.Managers.ClassManager;
+using static PointTool.Managers.QuizManager;
 
 namespace PointTool.Panes.Right;
 
-public class ClassMetaPane : TableLayoutPanel
+public class QuizMetaPane : TableLayoutPanel
 {
     private readonly Label titleLabel = new();
 
     private readonly TableLayoutPanel infoTable;
 
-    private readonly PropertyInfo[] classInfoProperties;
+    private readonly PropertyInfo[] quizInfoProperties;
 
     private static readonly HashSet<string> ExcludedProperties =
     [
-        nameof(ClassInfo.Description)
+        nameof(QuizInfo.Description),
+        nameof(QuizInfo.Scores),
+        nameof(QuizInfo.Stats)
     ];
 
-    private const string QuizCountLabel = "Quizzes";
     private const string StudentCountLabel = "Students";
+    private const string AverageScoreLabel = "Average Score";
 
-    public ClassMetaPane()
+    public QuizMetaPane()
     {
-        classInfoProperties = GetClassInfoProperties();
+        quizInfoProperties = GetQuizInfoProperties();
 
         infoTable = UIUtilities.CreateTable(
             columns: 2,
-            rows: classInfoProperties.Length + 2);
+            rows: quizInfoProperties.Length + 2);
 
         InitializeComponent();
 
         SetVisible(false);
     }
 
-    private static PropertyInfo[] GetClassInfoProperties()
+    private static PropertyInfo[] GetQuizInfoProperties()
     {
-        return [.. typeof(ClassInfo)
+        return [.. typeof(QuizInfo)
             .GetProperties(
                 BindingFlags.Instance |
                 BindingFlags.Public)
@@ -58,7 +60,7 @@ public class ClassMetaPane : TableLayoutPanel
         //
         // titleLabel
         //
-        titleLabel.Text = "Class Info";
+        titleLabel.Text = "Quiz Info";
         titleLabel.AutoSize = true;
         titleLabel.Dock = DockStyle.Fill;
         titleLabel.TextAlign = ContentAlignment.MiddleLeft;
@@ -94,10 +96,10 @@ public class ClassMetaPane : TableLayoutPanel
         infoTable.ColumnStyles.Add(
             new ColumnStyle(SizeType.Percent, 100f));
 
-        for (int row = 0; row < classInfoProperties.Length; row++)
+        for (int row = 0; row < quizInfoProperties.Length; row++)
         {
             PropertyInfo property =
-                classInfoProperties[row];
+                quizInfoProperties[row];
 
             AddLabel(
                 property.Name,
@@ -110,24 +112,14 @@ public class ClassMetaPane : TableLayoutPanel
                 row);
         }
 
-        int quizCountRow =
-            classInfoProperties.Length;
-
         int studentCountRow =
-            classInfoProperties.Length + 1;
+            quizInfoProperties.Length;
+
+        int averageScoreRow =
+            quizInfoProperties.Length + 1;
 
         AddLabel(
-            "Quizzes",
-            0,
-            quizCountRow);
-
-        AddValue(
-            string.Empty,
-            1,
-            quizCountRow);
-
-        AddLabel(
-            "Students",
+            StudentCountLabel,
             0,
             studentCountRow);
 
@@ -135,36 +127,46 @@ public class ClassMetaPane : TableLayoutPanel
             string.Empty,
             1,
             studentCountRow);
+
+        AddLabel(
+            AverageScoreLabel,
+            0,
+            averageScoreRow);
+
+        AddValue(
+            string.Empty,
+            1,
+            averageScoreRow);
     }
 
-    public void SetData(ClassData classData)
+    public void SetData(QuizInfo quizInfo)
     {
-        for (int row = 0; row < classInfoProperties.Length; row++)
+        for (int row = 0; row < quizInfoProperties.Length; row++)
         {
             PropertyInfo property =
-                classInfoProperties[row];
+                quizInfoProperties[row];
 
             object? value =
-                property.GetValue(classData.Info);
+                property.GetValue(quizInfo);
 
             SetValue(
                 row,
                 value?.ToString() ?? string.Empty);
         }
 
-        int quizCountRow =
-            classInfoProperties.Length;
-
         int studentCountRow =
-            classInfoProperties.Length + 1;
+            quizInfoProperties.Length;
 
-        SetValue(
-            quizCountRow,
-            classData.Stats.QuizCount.ToString());
+        int averageScoreRow =
+            quizInfoProperties.Length + 1;
 
         SetValue(
             studentCountRow,
-            classData.Stats.StudentCount.ToString());
+            quizInfo.Stats.StudentCount.ToString());
+
+        SetValue(
+            averageScoreRow,
+            quizInfo.Stats.AverageScore.ToString());
     }
 
     private void AddLabel(

@@ -52,6 +52,11 @@ public class ClassExplorer : UserControl
 
     public void RefreshTree()
     {
+        string selectedName = SelectedName;
+        string selectedClassName = SelectedClassName;
+        ClassExplorerSelectionType selectedType =
+            CurrentlySelected;
+
         treeView.BeginUpdate();
 
         treeView.Nodes.Clear();
@@ -70,6 +75,68 @@ public class ClassExplorer : UserControl
         }
 
         treeView.EndUpdate();
+
+        TreeNode? selectedNode =
+            FindNode(
+                selectedType,
+                selectedName,
+                selectedClassName);
+
+        if (selectedNode is not null)
+        {
+            treeView.Focus();
+            treeView.SelectedNode = selectedNode;
+        }
+        else
+        {
+            treeView.SelectedNode = null;
+        }
+    }
+
+    private TreeNode? FindNode(
+        ClassExplorerSelectionType selectionType,
+        string selectedName,
+        string selectedClassName)
+    {
+        if (selectionType == ClassExplorerSelectionType.None)
+        {
+            return null;
+        }
+
+        foreach (TreeNode classNode in treeView.Nodes)
+        {
+            if (selectionType ==
+                ClassExplorerSelectionType.Class)
+            {
+                if (classNode.Text.Equals(
+                    selectedName,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    return classNode;
+                }
+
+                continue;
+            }
+
+            if (!classNode.Text.Equals(
+                selectedClassName,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            foreach (TreeNode quizNode in classNode.Nodes)
+            {
+                if (quizNode.Text.Equals(
+                    selectedName,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    return quizNode;
+                }
+            }
+        }
+
+        return null;
     }
 
     private void TreeView_AfterSelect(
@@ -86,6 +153,10 @@ public class ClassExplorer : UserControl
             SelectedName = string.Empty;
 
             SelectedClassName = string.Empty;
+
+            SelectionChanged?.Invoke(
+                this,
+                EventArgs.Empty);
 
             return;
         }

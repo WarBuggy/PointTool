@@ -28,6 +28,8 @@ public class AddClassPane : WorkPane
 
     private readonly ClassManager classManager;
 
+    public event EventHandler? ClassCreated;
+
     public AddClassPane(ClassManager classManager)
     {
         this.classManager = classManager;
@@ -122,8 +124,7 @@ public class AddClassPane : WorkPane
 
         if (createResult.Success)
         {
-            // TODO:
-            // Switch to the next work pane.
+            ClassCreated?.Invoke(this, EventArgs.Empty);
         }
     }
 }

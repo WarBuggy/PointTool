@@ -91,6 +91,8 @@ public class WorkArea : TableLayoutPanel
 
     public void ShowPane(WorkPane pane)
     {
+        Clear();
+
         //
         // Title
         //
@@ -99,8 +101,6 @@ public class WorkArea : TableLayoutPanel
         //
         // Content
         //
-        contentTable.Controls.Clear();
-
         contentTable.Controls.Add(
             pane.ContentTable,
             0,
@@ -109,8 +109,6 @@ public class WorkArea : TableLayoutPanel
         //
         // Buttons
         //
-        buttonTable.Controls.Clear();
-
         for (int i = 0;
              i < pane.Buttons.Count && i < 10;
              i++)
@@ -124,5 +122,12 @@ public class WorkArea : TableLayoutPanel
                 i,
                 0);
         }
+    }
+
+    public void Clear()
+    {
+        titleLabel.Text = "";
+        contentTable.Controls.Clear();
+        buttonTable.Controls.Clear();
     }
 }

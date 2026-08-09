@@ -6,6 +6,8 @@ using PointTool.Panes.Work;
 using PointTool.Panes.Left;
 using PointTool.Enums;
 using PointTool.Panes.Right;
+using static PointTool.Managers.ClassManager;
+using static PointTool.Managers.QuizManager;
 
 namespace PointTool;
 
@@ -40,6 +42,9 @@ public class MainForm : Form
     private readonly ClassExplorer classExplorer;
 
     private readonly ClassMetaPane classMetaPane = new();
+
+    private readonly QuizMetaPane quizMetaPane = new();
+
     private readonly Dictionary<Type, WorkPane> workPanes = [];
 
     public MainForm()
@@ -146,7 +151,7 @@ public class MainForm : Form
             0,
             0);
         topRightTable.Controls.Add(
-            new Panel(),
+            quizMetaPane,
             1,
             0);
 
@@ -154,10 +159,10 @@ public class MainForm : Form
         rightPane.Dock = DockStyle.Fill;
         rightPane.RowStyles.Clear();
         rightPane.RowStyles.Add(
-            new RowStyle(SizeType.Percent, 20f));
+            new RowStyle(SizeType.Percent, 30f));
 
         rightPane.RowStyles.Add(
-            new RowStyle(SizeType.Percent, 80f));
+            new RowStyle(SizeType.Percent, 70f));
 
         rightPane.Controls.Add(
             topRightTable,
@@ -257,7 +262,9 @@ public class MainForm : Form
     {
         workPanes.Add(typeof(AddClassPane), new AddClassPane(classManager));
         workPanes.Add(typeof(UploadScorePane), new UploadScorePane(quizManager));
+
         GetWorkPane<UploadScorePane>().QuizCreated += UploadScorePane_QuizCreated;
+        GetWorkPane<AddClassPane>().ClassCreated += AddClassPane_ClassCreated;
 
     }
 
@@ -302,6 +309,8 @@ public class MainForm : Form
 
         quizManager.Refresh();
 
+        classManager.UpdateStats(quizManager);
+
         classExplorer.RefreshTree();
     }
 
@@ -312,10 +321,19 @@ public class MainForm : Form
         RefreshData();
     }
 
+    private void AddClassPane_ClassCreated(
+        object? sender,
+        EventArgs e)
+    {
+        RefreshData();
+    }
+
     private void ClassExplorer_SelectionChanged(
         object? sender,
         EventArgs e)
     {
+        workArea.Clear();
+
         switch (classExplorer.CurrentlySelected)
         {
             case ClassExplorerSelectionType.Class:
@@ -326,6 +344,8 @@ public class MainForm : Form
                     classManager.Classes[
                         classExplorer.SelectedClassName]);
 
+                HideQuizInfo();
+
                 break;
 
             case ClassExplorerSelectionType.Quiz:
@@ -335,12 +355,22 @@ public class MainForm : Form
                     classManager.Classes[
                         classExplorer.SelectedClassName]);
 
+                QuizInfo? quizInfo = quizManager.GetQuiz(
+                    classExplorer.SelectedClassName,
+                    classExplorer.SelectedName);
+
+                if (quizInfo is not null)
+                {
+                    ShowQuizInfo(quizInfo);
+                }
+
                 break;
 
             default:
                 leftActionArea.ClearAll();
 
                 HideClassInfo();
+                HideQuizInfo();
 
                 break;
         }
@@ -351,15 +381,25 @@ public class MainForm : Form
         return (T)workPanes[typeof(T)];
     }
 
-    private void ShowClassInfo(
-        ClassManager.ClassInfo classInfo)
+    private void ShowClassInfo(ClassData classData)
     {
-        classMetaPane.SetData(classInfo);
+        classMetaPane.SetData(classData);
         classMetaPane.SetVisible(true);
     }
 
     private void HideClassInfo()
     {
         classMetaPane.SetVisible(false);
+    }
+
+    private void ShowQuizInfo(QuizInfo quizInfo)
+    {
+        quizMetaPane.SetData(quizInfo);
+        quizMetaPane.SetVisible(true);
+    }
+
+    private void HideQuizInfo()
+    {
+        quizMetaPane.SetVisible(false);
     }
 }

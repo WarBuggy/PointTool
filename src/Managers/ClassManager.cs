@@ -8,9 +8,9 @@ public class ClassManager
 {
     public const string ClassInfoFileName = "classInfo.json";
 
-    private readonly Dictionary<string, ClassInfo> classes = [];
+    private readonly Dictionary<string, ClassData> classes = [];
 
-    public IReadOnlyDictionary<string, ClassInfo> Classes => classes;
+    public IReadOnlyDictionary<string, ClassData> Classes => classes;
 
     public ClassManager() { }
 
@@ -42,9 +42,11 @@ public class ClassManager
                     string.Empty);
             }
 
+            ClassData classData = new(classInfo);
+
             classes.Add(
                 normalizedName,
-                classInfo);
+                classData);
         }
     }
 
@@ -159,6 +161,16 @@ public class ClassManager
         }
     }
 
+    public void UpdateStats(QuizManager quizManager)
+    {
+        foreach ((string className, ClassData classData)
+            in classes)
+        {
+            classData.Stats =
+                quizManager.GetClassStats(className);
+        }
+    }
+
     public class ClassInfo
     {
         public string Name { get; init; } = string.Empty;
@@ -170,5 +182,19 @@ public class ClassManager
         public bool Success { get; init; }
 
         public string Message { get; init; } = string.Empty;
+    }
+
+    public class ClassStats
+    {
+        public int QuizCount { get; init; }
+
+        public int StudentCount { get; init; }
+    }
+
+    public class ClassData(ClassInfo classInfo)
+    {
+        public ClassInfo Info { get; } = classInfo;
+
+        public ClassStats Stats { get; set; } = new();
     }
 }
