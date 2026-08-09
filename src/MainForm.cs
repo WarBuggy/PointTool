@@ -319,6 +319,8 @@ public class MainForm : Form
         EventArgs e)
     {
         RefreshData();
+
+        classExplorer.ExpandClass(classExplorer.SelectedClassName);
     }
 
     private void AddClassPane_ClassCreated(

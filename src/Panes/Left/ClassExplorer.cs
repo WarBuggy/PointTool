@@ -57,6 +57,9 @@ public class ClassExplorer : UserControl
         ClassExplorerSelectionType selectedType =
             CurrentlySelected;
 
+        HashSet<string> expandedClassNames =
+           GetExpandedClassNames();
+
         treeView.BeginUpdate();
 
         treeView.Nodes.Clear();
@@ -75,6 +78,14 @@ public class ClassExplorer : UserControl
         }
 
         treeView.EndUpdate();
+
+        foreach (TreeNode classNode in treeView.Nodes)
+        {
+            if (expandedClassNames.Contains(classNode.Text))
+            {
+                classNode.Expand();
+            }
+        }
 
         TreeNode? selectedNode =
             FindNode(
@@ -187,6 +198,35 @@ public class ClassExplorer : UserControl
         }
 
         SelectionChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private HashSet<string> GetExpandedClassNames()
+    {
+        HashSet<string> expandedClassNames =
+            new(StringComparer.OrdinalIgnoreCase);
+        foreach (TreeNode classNode in treeView.Nodes)
+        {
+            if (classNode.IsExpanded)
+            {
+                expandedClassNames.Add(classNode.Text);
+            }
+        }
+
+        return expandedClassNames;
+    }
+
+    public void ExpandClass(string className)
+    {
+        foreach (TreeNode classNode in treeView.Nodes)
+        {
+            if (classNode.Text.Equals(
+                className,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                classNode.Expand();
+                return;
+            }
+        }
     }
 
 }
