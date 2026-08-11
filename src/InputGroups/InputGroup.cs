@@ -106,4 +106,6 @@ public abstract class InputGroup
     {
         InputControl.Focus();
     }
+
+    public abstract void ResetInput();
 }

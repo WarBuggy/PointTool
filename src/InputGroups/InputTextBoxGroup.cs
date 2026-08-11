@@ -40,4 +40,10 @@ public class InputTextBoxGroup : InputGroup
     }
 
     public TextBox TextBox => textBox;
+
+    public override void ResetInput()
+    {
+        InputControl.Text = string.Empty;
+        HasError = false;
+    }
 }

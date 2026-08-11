@@ -107,4 +107,15 @@ public class InputFileGroup : InputGroup
 
         fileNameLabel.Text = FileName;
     }
+
+    public override void ResetInput()
+    {
+        FilePath = string.Empty;
+
+        fileNameLabel.Text =
+            "No file selected";
+
+        HasError = false;
+    }
+
 }

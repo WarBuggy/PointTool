@@ -1,5 +1,6 @@
 using PointTool.InputGroups;
 using PointTool.Managers;
+using PointTool.Modals;
 using PointTool.Utilities;
 using PointTool.Validation;
 
@@ -148,28 +149,42 @@ public class UploadScorePane : WorkPane
 
         Form? owner = ContentTable.FindForm();
 
-        try
-        {
-            quizManager.CreateQuizScoreFile(
-                ClassName,
-                name,
-                description,
-                scores);
+        string? errorMessage = null;
 
+        WaitModal.Instance.Show(() =>
+        {
+            try
+            {
+                quizManager.CreateQuizScoreFile(
+                    ClassName,
+                    name,
+                    description,
+                    scores);
+            }
+            catch (IOException ex)
+            {
+                errorMessage = ex.Message;
+            }
+        });
+
+        if (errorMessage is null)
+        {
             UIUtilities.ShowMessage(
                 "Upload Scores",
                 $"Quiz \"{name}\" was uploaded successfully.",
                 owner);
 
+            ResetInputs();
+
             QuizCreated?.Invoke(
                 this,
                 EventArgs.Empty);
         }
-        catch (IOException ex)
+        else
         {
             UIUtilities.ShowMessage(
                 "Upload Scores",
-                ex.Message,
+                errorMessage,
                 owner);
         }
     }

@@ -47,7 +47,9 @@ public class MainForm : Form
 
     private readonly DetailArea detailArea = new();
 
-    private readonly QuizScorePane quizScorePane = new();
+    private readonly Dictionary<string, QuizScorePane> quizScorePanes = [];
+
+    private readonly Dictionary<string, ClassSummaryPane> classSummaryPanes = [];
 
     private readonly Dictionary<Type, WorkPane> workPanes = [];
 
@@ -66,6 +68,9 @@ public class MainForm : Form
         CreateWorkPane();
 
         CreateLeftPane();
+
+        // classSummaryPane.ExportRequested += ClassSummaryPane_ExportRequested;
+
     }
 
     private void InitializeComponent()
@@ -309,6 +314,9 @@ public class MainForm : Form
 
     private void RefreshData()
     {
+        ClearQuizScorePaneCache();
+        ClearClassSummaryPaneCache();
+
         classManager.Refresh();
 
         quizManager.Refresh();
@@ -338,43 +346,47 @@ public class MainForm : Form
         object? sender,
         EventArgs e)
     {
-        workArea.Clear();
-
-        switch (classExplorer.CurrentlySelected)
+        WaitModal.Instance.Show(() =>
         {
-            case ClassExplorerSelectionType.Class:
-                leftActionArea.ShowButtons(
-                    classButtonSet.Buttons);
-                detailArea.Clear();
+            workArea.Clear();
 
-                ShowClassInfo(
-                    classManager.Classes[
-                        classExplorer.SelectedClassName]);
+            switch (classExplorer.CurrentlySelected)
+            {
+                case ClassExplorerSelectionType.Class:
+                    leftActionArea.ShowButtons(
+                        classButtonSet.Buttons);
 
-                HideQuizInfo();
+                    ShowClassInfo(
+                        classManager.Classes[
+                            classExplorer.SelectedClassName]);
 
-                break;
+                    HideQuizInfo();
 
-            case ClassExplorerSelectionType.Quiz:
-                leftActionArea.ClearAll();
+                    ShowClassSummary();
 
-                ShowClassInfo(
-                    classManager.Classes[
-                        classExplorer.SelectedClassName]);
+                    break;
 
-                ShowQuizData();
+                case ClassExplorerSelectionType.Quiz:
+                    leftActionArea.ClearAll();
 
-                break;
+                    ShowClassInfo(
+                        classManager.Classes[
+                            classExplorer.SelectedClassName]);
 
-            default:
-                leftActionArea.ClearAll();
-                detailArea.Clear();
+                    ShowQuizData();
 
-                HideClassInfo();
-                HideQuizInfo();
+                    break;
 
-                break;
-        }
+                default:
+                    leftActionArea.ClearAll();
+
+                    HideClassInfo();
+                    HideQuizInfo();
+                    HideDetailPane();
+
+                    break;
+            }
+        });
     }
 
     private T GetWorkPane<T>() where T : WorkPane
@@ -409,21 +421,102 @@ public class MainForm : Form
         QuizInfo? quizInfo =
             quizManager.GetQuizzes(
                 classExplorer.SelectedClassName)
-            .FirstOrDefault(quiz =>
-                quiz.Name.Equals(
-                    classExplorer.SelectedName,
-                    StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(quiz =>
+                    quiz.Name.Equals(
+                        classExplorer.SelectedName,
+                        StringComparison.OrdinalIgnoreCase));
 
         if (quizInfo is null)
         {
+            HideQuizInfo();
             return;
         }
 
         ShowQuizInfo(quizInfo);
 
-        quizScorePane.SetData(quizInfo);
+        QuizScorePane pane = GetQuizScorePane(
+            classExplorer.SelectedClassName, quizInfo);
+
+        if (!quizScorePanes.ContainsKey(
+            $"{classExplorer.SelectedClassName}:{quizInfo.Name}"))
+        {
+            pane.SetData(quizInfo);
+        }
+
+        detailArea.ShowDisplayPane(pane);
+
+    }
+
+    private void ShowClassSummary()
+    {
+        ClassSummaryPane classSummaryPane =
+            GetClassSummaryPane(classExplorer.SelectedClassName);
 
         detailArea.ShowDisplayPane(
-            quizScorePane);
+            classSummaryPane);
+    }
+
+    private void HideDetailPane()
+    {
+        detailArea.Clear();
+    }
+
+    private QuizScorePane GetQuizScorePane(
+        string className,
+        QuizInfo quizInfo)
+    {
+        string key =
+            $"{className}:{quizInfo.Name}";
+
+        if (quizScorePanes.TryGetValue(
+            key,
+            out QuizScorePane? pane))
+        {
+            return pane;
+        }
+
+        pane = new QuizScorePane();
+
+        pane.SetData(quizInfo);
+
+        quizScorePanes.Add(
+            key,
+            pane);
+
+        return pane;
+    }
+
+    private void ClearQuizScorePaneCache()
+    {
+        quizScorePanes.Clear();
+    }
+
+    private ClassSummaryPane GetClassSummaryPane(
+        string className)
+    {
+        if (classSummaryPanes.TryGetValue(
+            className,
+            out ClassSummaryPane? pane))
+        {
+            return pane;
+        }
+
+        pane = new ClassSummaryPane();
+
+        ClassSummary summary =
+            quizManager.GetClassSummary(className);
+
+        pane.SetData(summary);
+
+        classSummaryPanes.Add(
+            className,
+            pane);
+
+        return pane;
+    }
+
+    private void ClearClassSummaryPaneCache()
+    {
+        classSummaryPanes.Clear();
     }
 }

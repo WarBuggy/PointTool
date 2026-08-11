@@ -51,7 +51,6 @@ public class DetailArea : TableLayoutPanel
             titleLabel.Font.FontFamily,
             11f,
             FontStyle.Bold);
-        titleLabel.Text = "Class Summary";
 
         //
         // contentArea
@@ -109,6 +108,8 @@ public class DetailArea : TableLayoutPanel
 
         contentArea.Controls.Add(
             displayPane);
+        displayPane.Location = new Point(0, 0);
+        displayPane.Size = displayPane.GetPreferredSize(Size.Empty);
 
         for (int i = 0; i < displayPane.Buttons.Count; i++)
         {

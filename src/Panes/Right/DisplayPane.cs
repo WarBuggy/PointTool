@@ -19,7 +19,7 @@ public abstract class DisplayPane : TableLayoutPanel
 
         AutoSize = true;
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        Dock = DockStyle.Top;
+        Anchor = AnchorStyles.Top | AnchorStyles.Left;
 
         //
         // DisplayTable
@@ -35,5 +35,10 @@ public abstract class DisplayPane : TableLayoutPanel
             0);
 
         ResumeLayout(false);
+    }
+
+    public void AddButton(Button button)
+    {
+        buttons.Add(button);
     }
 }

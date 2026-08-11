@@ -1,5 +1,6 @@
 using PointTool.InputGroups;
 using PointTool.Managers;
+using PointTool.Modals;
 using PointTool.Utilities;
 using PointTool.Validation;
 using static PointTool.Managers.ClassManager;
@@ -92,8 +93,8 @@ public class AddClassPane : WorkPane
     }
 
     private void CreateButton_Click(
-        object? sender,
-        EventArgs e)
+       object? sender,
+       EventArgs e)
     {
         ValidationResult result = Validate();
 
@@ -108,10 +109,15 @@ public class AddClassPane : WorkPane
         string description =
             result.GetValue<string>(DescriptionKey);
 
-        CreateClassResult createResult =
-            classManager.CreateClass(
-                name,
-                description);
+        CreateClassResult createResult = null!;
+
+        WaitModal.Instance.Show(() =>
+        {
+            createResult =
+                classManager.CreateClass(
+                    name,
+                    description);
+        });
 
         Form? owner = ContentTable.FindForm();
 
@@ -124,7 +130,11 @@ public class AddClassPane : WorkPane
 
         if (createResult.Success)
         {
-            ClassCreated?.Invoke(this, EventArgs.Empty);
+            ResetInputs();
+
+            ClassCreated?.Invoke(
+                this,
+                EventArgs.Empty);
         }
     }
 }

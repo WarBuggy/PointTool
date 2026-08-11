@@ -2,6 +2,16 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "PointTool (SOC201)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build (SOC201)",
+            "program": "${workspaceFolder}/bin/Debug/net8.0-windows/PointTool.exe",
+            "cwd": "${workspaceFolder}/bin/Debug/net8.0-windows",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
             "name": "PointTool (Basic)",
             "type": "coreclr",
             "request": "launch",

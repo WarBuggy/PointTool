@@ -236,6 +236,95 @@ public class QuizManager(ClassManager classManager)
         return null;
     }
 
+    public ClassSummary GetClassSummary(
+        string className)
+    {
+        IReadOnlyList<QuizInfo> quizList =
+            GetQuizzes(className);
+
+        ClassSummary summary = new();
+
+        foreach (QuizInfo quizInfo in quizList)
+        {
+            summary.QuizNames.Add(
+                quizInfo.Name);
+        }
+
+        Dictionary<string, StudentSummary> students = [];
+
+        foreach (QuizInfo quizInfo in quizList)
+        {
+            foreach (QuizScore score in quizInfo.Scores)
+            {
+                if (!students.TryGetValue(
+                    score.Student,
+                    out StudentSummary? studentSummary))
+                {
+                    studentSummary = new StudentSummary
+                    {
+                        Name = score.Student
+                    };
+
+                    students.Add(
+                        score.Student,
+                        studentSummary);
+                }
+
+                studentSummary.Scores[quizInfo.Name] =
+                    score.Score;
+            }
+        }
+
+        foreach (StudentSummary student in students.Values)
+        {
+            int totalScore = 0;
+            int quizzesTaken = 0;
+
+            foreach (QuizInfo quizInfo in quizList)
+            {
+                if (student.Scores.TryGetValue(
+                    quizInfo.Name,
+                    out int score))
+                {
+                    totalScore += score;
+                    quizzesTaken++;
+                }
+                else
+                {
+                    student.Scores.Add(
+                        quizInfo.Name,
+                        0);
+                }
+            }
+
+            student.TotalScore = totalScore;
+            student.QuizzesTaken = quizzesTaken;
+
+            summary.Students.Add(
+                student);
+        }
+
+        summary.Students.Sort(
+            (a, b) =>
+            {
+                int result =
+                    b.TotalScore.CompareTo(
+                        a.TotalScore);
+
+                if (result != 0)
+                {
+                    return result;
+                }
+
+                return string.Compare(
+                    a.Name,
+                    b.Name,
+                    StringComparison.OrdinalIgnoreCase);
+            });
+
+        return summary;
+    }
+
     public class QuizInfo
     {
         public string Name { get; init; } = string.Empty;

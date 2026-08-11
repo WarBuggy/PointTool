@@ -121,4 +121,12 @@ public abstract class WorkPane
 
         result.Errors[0].InputGroup.FocusInput();
     }
+
+    protected void ResetInputs()
+    {
+        foreach (InputGroup inputGroup in InputGroupList)
+        {
+            inputGroup.ResetInput();
+        }
+    }
 }
