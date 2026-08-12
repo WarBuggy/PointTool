@@ -5,6 +5,8 @@ public class ClassSummary
     public List<string> QuizNames { get; init; } = [];
 
     public List<StudentSummary> Students { get; init; } = [];
+
+    public Dictionary<string, int> QuizAverageScores { get; } = [];
 }
 
 public class StudentSummary

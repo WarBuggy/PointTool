@@ -1,4 +1,5 @@
 using PointTool.Managers;
+using PointTool.Utilities;
 
 namespace PointTool.Panes.Right;
 
@@ -13,6 +14,12 @@ public class ClassSummaryPane : DisplayPane
         Text = "Export to Excel",
         AutoSize = true
     };
+
+    private ClassSummary? summary;
+
+    public ClassSummary Summary => summary
+        ?? throw new InvalidOperationException(
+            "Class summary has not been initialized.");
 
     public event EventHandler? ExportRequested;
 
@@ -38,11 +45,12 @@ public class ClassSummaryPane : DisplayPane
             EventArgs.Empty);
     }
 
-    public void SetData(
-        ClassSummary summary)
+    public void SetData(ClassSummary summary)
     {
         ClearTable();
         SetupDisplayTable(summary);
+
+        this.summary = summary;
 
         for (int row = 0; row < summary.Students.Count; row++)
         {
@@ -68,22 +76,28 @@ public class ClassSummaryPane : DisplayPane
                 tableRow,
                 AnchorStyles.Right);
 
-            for (int quiz = 0;
-                 quiz < summary.QuizNames.Count;
-                 quiz++)
+            for (int quiz = summary.QuizNames.Count - 1; quiz >= 0; quiz--)
             {
                 string quizName =
                     summary.QuizNames[quiz];
 
-                student.Scores.TryGetValue(
-                    quizName,
-                    out int score);
+                int averageScore =
+                    summary.QuizAverageScores[quizName];
 
-                AddLabel(
-                    score.ToString(),
-                    quiz + 3,
-                    tableRow,
-                    AnchorStyles.Right);
+                int displayColumn =
+                    summary.QuizNames.Count - 1 - quiz + 3;
+
+                if (student.Scores.TryGetValue(
+                    quizName,
+                    out int score))
+                {
+                    AddLabel(score.ToString(), displayColumn,
+                        tableRow, AnchorStyles.Right);
+                }
+                else
+                {
+                    AddNoScoreLabel(displayColumn, tableRow);
+                }
             }
         }
     }
@@ -145,13 +159,18 @@ public class ClassSummaryPane : DisplayPane
             AnchorStyles.Right,
             FontStyle.Bold);
 
-        for (int quiz = 0;
-             quiz < summary.QuizNames.Count;
-             quiz++)
+        for (int quiz = summary.QuizNames.Count - 1; quiz >= 0; quiz--)
         {
+            int displayColumn =
+                summary.QuizNames.Count - 1 - quiz + 3;
+
+            string quizName = summary.QuizNames[quiz];
+
+            int averageScore = summary.QuizAverageScores[quizName];
+
             AddLabel(
-                summary.QuizNames[quiz],
-                quiz + 3,
+                 $"{quizName}\r\n({averageScore})",
+                displayColumn,
                 0,
                 AnchorStyles.Right,
                 FontStyle.Bold);
@@ -174,22 +193,41 @@ public class ClassSummaryPane : DisplayPane
         int column,
         int row,
         AnchorStyles anchor = AnchorStyles.Left,
-        FontStyle fontStyle = FontStyle.Regular)
+        FontStyle fontStyle = FontStyle.Regular,
+        Color? foreColor = null,
+        Color? backColor = null)
     {
         Label label = new()
         {
             Text = text,
             AutoSize = true,
             Anchor = anchor,
-            Padding = new Padding(4)
+            Padding = new Padding(4),
+            ForeColor = foreColor ?? SystemColors.ControlText,
+            BackColor = backColor ?? SystemColors.Control,
+            Font = new Font(
+                Font.FontFamily,
+                Font.Size,
+                fontStyle)
         };
 
-        if (fontStyle != FontStyle.Regular)
+        DisplayTable.Controls.Add(
+            label,
+            column,
+            row);
+    }
+
+    private void AddNoScoreLabel(
+      int column,
+      int row)
+    {
+        Label label = new()
         {
-            label.Font = new Font(
-                label.Font,
-                fontStyle);
-        }
+            Text = string.Empty,
+            AutoSize = true,
+            Dock = DockStyle.Fill,
+            BackColor = UiConstants.NoScoreColor
+        };
 
         DisplayTable.Controls.Add(
             label,

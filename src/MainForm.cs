@@ -8,6 +8,7 @@ using PointTool.Enums;
 using PointTool.Panes.Right;
 using static PointTool.Managers.ClassManager;
 using static PointTool.Managers.QuizManager;
+using PointTool.Export;
 
 namespace PointTool;
 
@@ -68,8 +69,6 @@ public class MainForm : Form
         CreateWorkPane();
 
         CreateLeftPane();
-
-        // classSummaryPane.ExportRequested += ClassSummaryPane_ExportRequested;
 
     }
 
@@ -503,6 +502,9 @@ public class MainForm : Form
 
         pane = new ClassSummaryPane();
 
+        pane.ExportRequested += ClassSummaryPane_ExportRequested;
+
+
         ClassSummary summary =
             quizManager.GetClassSummary(className);
 
@@ -517,6 +519,44 @@ public class MainForm : Form
 
     private void ClearClassSummaryPaneCache()
     {
+        foreach (ClassSummaryPane pane in classSummaryPanes.Values)
+        {
+            pane.ExportRequested -=
+                ClassSummaryPane_ExportRequested;
+        }
+
         classSummaryPanes.Clear();
+    }
+
+    private void ClassSummaryPane_ExportRequested(
+        object? sender,
+        EventArgs e)
+    {
+        if (sender is not ClassSummaryPane pane)
+        {
+            return;
+        }
+
+        string className =
+            classExplorer.SelectedClassName;
+
+        using SaveFileDialog dialog = new()
+        {
+            Title = "Export Class Summary",
+            Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+            DefaultExt = "xlsx",
+            AddExtension = true,
+            FileName = $"{className} Summary.xlsx"
+        };
+
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        ClassSummaryExcelExporter.Export(
+            className,
+            pane.Summary,
+            dialog.FileName);
     }
 }

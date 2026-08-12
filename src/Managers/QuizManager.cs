@@ -40,17 +40,6 @@ public class QuizManager(ClassManager classManager)
             UpdateStudentHistory(
                 quizList);
 
-            foreach (QuizInfo quizInfo in quizList)
-            {
-                System.Diagnostics.Debug.WriteLine(
-                    $"{quizInfo.Name} | " +
-                    $"{quizInfo.QuizDate:d} | " +
-                    $"Scores: {quizInfo.Scores.Count} | " +
-                    $"Previous: {quizInfo.Stats.PreviousStudents.Count} | " +
-                    $"New: {quizInfo.Stats.NewStudents.Count}");
-            }
-
-
             quizzes.Add(
                 className,
                 quizList);
@@ -249,8 +238,7 @@ public class QuizManager(ClassManager classManager)
         return null;
     }
 
-    public ClassSummary GetClassSummary(
-        string className)
+    public ClassSummary GetClassSummary(string className)
     {
         IReadOnlyList<QuizInfo> quizList =
             GetQuizzes(className);
@@ -259,8 +247,10 @@ public class QuizManager(ClassManager classManager)
 
         foreach (QuizInfo quizInfo in quizList)
         {
-            summary.QuizNames.Add(
-                quizInfo.Name);
+            summary.QuizNames.Add(quizInfo.Name);
+
+            summary.QuizAverageScores.Add(
+                quizInfo.Name, quizInfo.Stats.AverageScore);
         }
 
         Dictionary<string, StudentSummary> students = [];
@@ -301,12 +291,6 @@ public class QuizManager(ClassManager classManager)
                 {
                     totalScore += score;
                     quizzesTaken++;
-                }
-                else
-                {
-                    student.Scores.Add(
-                        quizInfo.Name,
-                        0);
                 }
             }
 
