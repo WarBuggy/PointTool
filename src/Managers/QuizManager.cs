@@ -35,10 +35,21 @@ public class QuizManager(ClassManager classManager)
             }
 
             quizList.Sort(
-                (a, b) => string.Compare(
-                    a.Name,
-                    b.Name,
-                    StringComparison.OrdinalIgnoreCase));
+                (a, b) => b.QuizDate.CompareTo(a.QuizDate));
+
+            UpdateStudentHistory(
+                quizList);
+
+            foreach (QuizInfo quizInfo in quizList)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    $"{quizInfo.Name} | " +
+                    $"{quizInfo.QuizDate:d} | " +
+                    $"Scores: {quizInfo.Scores.Count} | " +
+                    $"Previous: {quizInfo.Stats.PreviousStudents.Count} | " +
+                    $"New: {quizInfo.Stats.NewStudents.Count}");
+            }
+
 
             quizzes.Add(
                 className,
@@ -62,6 +73,7 @@ public class QuizManager(ClassManager classManager)
         string className,
         string name,
         string description,
+        DateTime quizDate,
         List<QuizScore> scores)
     {
         if (!quizzes.TryGetValue(
@@ -83,6 +95,7 @@ public class QuizManager(ClassManager classManager)
         {
             Name = name,
             Description = description,
+            QuizDate = quizDate,
             Scores = scores
         };
 
@@ -325,6 +338,45 @@ public class QuizManager(ClassManager classManager)
         return summary;
     }
 
+    private static void UpdateStudentHistory(
+        List<QuizInfo> quizList)
+    {
+        HashSet<string> previousStudents = [];
+
+        for (int index = quizList.Count - 1;
+             index >= 0;
+             index--)
+        {
+            QuizInfo quizInfo =
+                quizList[index];
+
+            quizInfo.Stats.PreviousStudents.Clear();
+            quizInfo.Stats.NewStudents.Clear();
+
+            foreach (string student in previousStudents)
+            {
+                quizInfo.Stats.PreviousStudents.Add(
+                    student);
+            }
+
+            foreach (QuizScore score in quizInfo.Scores)
+            {
+                if (!previousStudents.Contains(
+                    score.Student))
+                {
+                    quizInfo.Stats.NewStudents.Add(
+                        score.Student);
+                }
+            }
+
+            foreach (QuizScore score in quizInfo.Scores)
+            {
+                previousStudents.Add(
+                    score.Student);
+            }
+        }
+    }
+
     public class QuizInfo
     {
         public string Name { get; init; } = string.Empty;
@@ -332,6 +384,8 @@ public class QuizManager(ClassManager classManager)
         public string Description { get; init; } = string.Empty;
 
         public List<QuizScore> Scores { get; init; } = [];
+
+        public DateTime QuizDate { get; init; }
 
         public QuizStats Stats { get; set; } = new();
     }
@@ -341,5 +395,9 @@ public class QuizManager(ClassManager classManager)
         public int StudentCount { get; init; }
 
         public int AverageScore { get; init; }
+
+        public HashSet<string> PreviousStudents { get; init; } = [];
+
+        public HashSet<string> NewStudents { get; init; } = [];
     }
 }

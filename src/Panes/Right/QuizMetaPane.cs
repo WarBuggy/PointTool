@@ -1,4 +1,3 @@
-using System.Reflection;
 using PointTool.Utilities;
 using static PointTool.Managers.QuizManager;
 
@@ -8,41 +7,39 @@ public class QuizMetaPane : TableLayoutPanel
 {
     private readonly Label titleLabel = new();
 
-    private readonly TableLayoutPanel infoTable;
+    private readonly TableLayoutPanel infoTable =
+        UIUtilities.CreateTable(
+            columns: 4,
+            rows: 3);
 
-    private readonly PropertyInfo[] quizInfoProperties;
+    private const int NameRow = 0;
+    private const int StatsRow = 1;
+    private const int NewStudentsRow = 2;
 
-    private static readonly HashSet<string> ExcludedProperties =
-    [
-        nameof(QuizInfo.Description),
-        nameof(QuizInfo.Scores),
-        nameof(QuizInfo.Stats)
-    ];
+    private const int LabelColumn = 0;
+    private const int ValueColumn = 1;
+    private const int SecondLabelColumn = 2;
+    private const int SecondValueColumn = 3;
 
+    private const string NameLabel = "Name";
+    private const string QuizDateLabel = "Quiz Date";
     private const string StudentCountLabel = "Students";
     private const string AverageScoreLabel = "Average Score";
+    private const string NewStudentLabel = "New Students";
+
+    private readonly Label nameValue = new();
+    private readonly Label quizDateValue = new();
+    private readonly Label studentCountValue = new();
+    private readonly Label averageScoreValue = new();
+
+    private Label newStudentLabel = new();
+    private readonly Label newStudentValue = new();
 
     public QuizMetaPane()
     {
-        quizInfoProperties = GetQuizInfoProperties();
-
-        infoTable = UIUtilities.CreateTable(
-            columns: 2,
-            rows: quizInfoProperties.Length + 2);
-
         InitializeComponent();
 
         SetVisible(false);
-    }
-
-    private static PropertyInfo[] GetQuizInfoProperties()
-    {
-        return [.. typeof(QuizInfo)
-            .GetProperties(
-                BindingFlags.Instance |
-                BindingFlags.Public)
-            .Where(property =>
-                !ExcludedProperties.Contains(property.Name))];
     }
 
     private void InitializeComponent()
@@ -51,6 +48,7 @@ public class QuizMetaPane : TableLayoutPanel
         AutoSize = false;
 
         RowStyles.Clear();
+
         RowStyles.Add(
             new RowStyle(SizeType.AutoSize));
 
@@ -70,7 +68,92 @@ public class QuizMetaPane : TableLayoutPanel
             11f,
             FontStyle.Bold);
 
-        SetupInfoTable();
+        //
+        // infoTable
+        //
+        infoTable.AutoSize = true;
+        infoTable.AutoSizeMode =
+            AutoSizeMode.GrowAndShrink;
+        infoTable.Dock = DockStyle.Top;
+
+        infoTable.ColumnStyles.Clear();
+
+        infoTable.ColumnStyles.Add(
+            new ColumnStyle(SizeType.AutoSize));
+
+        infoTable.ColumnStyles.Add(
+            new ColumnStyle(SizeType.AutoSize));
+
+        infoTable.ColumnStyles.Add(
+            new ColumnStyle(SizeType.AutoSize));
+
+        infoTable.ColumnStyles.Add(
+            new ColumnStyle(SizeType.AutoSize));
+
+        infoTable.ColumnStyles.Add(
+            new ColumnStyle(SizeType.Percent, 100f));
+
+        newStudentLabel = new()
+        {
+            Text = NewStudentLabel,
+            AutoSize = true,
+            Anchor = AnchorStyles.Left,
+            Padding = new Padding(4),
+            Font = new Font(
+               SystemFonts.DefaultFont,
+               FontStyle.Bold)
+        };
+        newStudentLabel.Text = NewStudentLabel;
+
+        AddLabel(
+            NameLabel,
+            LabelColumn,
+            NameRow);
+
+        AddValue(
+            nameValue,
+            ValueColumn,
+            NameRow);
+
+        AddLabel(
+            QuizDateLabel,
+            SecondLabelColumn,
+            NameRow);
+
+        AddValue(
+            quizDateValue,
+            SecondValueColumn,
+            NameRow);
+
+        AddLabel(
+            StudentCountLabel,
+            LabelColumn,
+            StatsRow);
+
+        AddValue(
+            studentCountValue,
+            ValueColumn,
+            StatsRow);
+
+        AddLabel(
+            AverageScoreLabel,
+            SecondLabelColumn,
+            StatsRow);
+
+        AddValue(
+            averageScoreValue,
+            SecondValueColumn,
+            StatsRow);
+
+        infoTable.Controls.Add(
+            newStudentLabel,
+            LabelColumn,
+            NewStudentsRow);
+
+        AddValue(
+            newStudentValue,
+            ValueColumn,
+            NewStudentsRow);
 
         Controls.Add(
             titleLabel,
@@ -83,103 +166,44 @@ public class QuizMetaPane : TableLayoutPanel
             1);
     }
 
-    private void SetupInfoTable()
-    {
-        infoTable.AutoSize = true;
-        infoTable.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        infoTable.Dock = DockStyle.Top;
-
-        infoTable.ColumnStyles.Clear();
-        infoTable.ColumnStyles.Add(
-            new ColumnStyle(SizeType.AutoSize));
-
-        infoTable.ColumnStyles.Add(
-            new ColumnStyle(SizeType.Percent, 100f));
-
-        for (int row = 0; row < quizInfoProperties.Length; row++)
-        {
-            PropertyInfo property =
-                quizInfoProperties[row];
-
-            AddLabel(
-                property.Name,
-                0,
-                row);
-
-            AddValue(
-                string.Empty,
-                1,
-                row);
-        }
-
-        int studentCountRow =
-            quizInfoProperties.Length;
-
-        int averageScoreRow =
-            quizInfoProperties.Length + 1;
-
-        AddLabel(
-            StudentCountLabel,
-            0,
-            studentCountRow);
-
-        AddValue(
-            string.Empty,
-            1,
-            studentCountRow);
-
-        AddLabel(
-            AverageScoreLabel,
-            0,
-            averageScoreRow);
-
-        AddValue(
-            string.Empty,
-            1,
-            averageScoreRow);
-    }
-
     public void SetData(QuizInfo quizInfo)
     {
-        for (int row = 0; row < quizInfoProperties.Length; row++)
-        {
-            PropertyInfo property =
-                quizInfoProperties[row];
+        nameValue.Text =
+            quizInfo.Name;
 
-            object? value =
-                property.GetValue(quizInfo);
+        quizDateValue.Text =
+            quizInfo.QuizDate.ToShortDateString();
 
-            SetValue(
-                row,
-                value?.ToString() ?? string.Empty);
-        }
+        studentCountValue.Text =
+            quizInfo.Stats.StudentCount.ToString();
 
-        int studentCountRow =
-            quizInfoProperties.Length;
+        averageScoreValue.Text =
+            quizInfo.Stats.AverageScore.ToString();
 
-        int averageScoreRow =
-            quizInfoProperties.Length + 1;
+        newStudentValue.Text =
+            quizInfo.Stats.NewStudents.Count.ToString();
 
-        SetValue(
-            studentCountRow,
-            quizInfo.Stats.StudentCount.ToString());
+        Color newStudentColor = quizInfo.Stats.NewStudents.Count > 0
+            ? UiConstants.NewStudentColor : SystemColors.ControlText;
+        newStudentLabel.ForeColor = newStudentColor;
+        newStudentValue.ForeColor = newStudentColor;
 
-        SetValue(
-            averageScoreRow,
-            quizInfo.Stats.AverageScore.ToString());
     }
 
     private void AddLabel(
-        string text,
-        int column,
-        int row)
+     string text,
+     int column,
+     int row)
     {
         Label label = new()
         {
             Text = text,
             AutoSize = true,
             Anchor = AnchorStyles.Left,
-            Padding = new Padding(4)
+            Padding = new Padding(4),
+            Font = new Font(
+                SystemFonts.DefaultFont,
+                FontStyle.Bold)
         };
 
         infoTable.Controls.Add(
@@ -189,35 +213,18 @@ public class QuizMetaPane : TableLayoutPanel
     }
 
     private void AddValue(
-        string text,
+        Label label,
         int column,
         int row)
     {
-        Label label = new()
-        {
-            Text = text,
-            AutoSize = true,
-            Anchor = AnchorStyles.Left,
-            Padding = new Padding(4)
-        };
+        label.AutoSize = true;
+        label.Anchor = AnchorStyles.Left;
+        label.Padding = new Padding(4);
 
         infoTable.Controls.Add(
             label,
             column,
             row);
-    }
-
-    private void SetValue(
-        int row,
-        string value)
-    {
-        Control? control =
-            infoTable.GetControlFromPosition(1, row);
-
-        if (control is Label label)
-        {
-            label.Text = value;
-        }
     }
 
     public void SetVisible(bool visible)

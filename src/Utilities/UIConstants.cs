@@ -21,4 +21,6 @@ public static class UiConstants
 
     public const int LeftActionAreaButtonHeight = 32;
 
+    public static Color NewStudentColor = Color.Red;
+
 }

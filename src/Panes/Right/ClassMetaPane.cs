@@ -177,7 +177,10 @@ public class ClassMetaPane : TableLayoutPanel
             Text = text,
             AutoSize = true,
             Anchor = AnchorStyles.Left,
-            Padding = new Padding(4)
+            Padding = new Padding(4),
+            Font = new Font(
+                SystemFonts.DefaultFont,
+                FontStyle.Bold),
         };
 
         infoTable.Controls.Add(

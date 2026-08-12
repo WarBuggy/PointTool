@@ -1,4 +1,5 @@
 using PointTool.Managers;
+using PointTool.Utilities;
 using static PointTool.Panes.Work.UploadScorePane;
 
 namespace PointTool.Panes.Right;
@@ -54,24 +55,49 @@ public class QuizScorePane : DisplayPane
     {
         ClearScores();
 
-        for (int row = 0; row < quizInfo.Scores.Count; row++)
+        HashSet<string> newStudents =
+            quizInfo.Stats.NewStudents;
+
+        IEnumerable<QuizScore> scores =
+            quizInfo.Scores
+                .OrderByDescending(score =>
+                    newStudents.Contains(score.Student))
+                .ThenBy(
+                    score => score.Student,
+                    StringComparer.OrdinalIgnoreCase);
+
+        int row = 1;
+
+        foreach (QuizScore score in scores)
         {
             DisplayTable.RowStyles.Add(
                 new RowStyle(SizeType.AutoSize));
 
-            QuizScore score =
-                quizInfo.Scores[row];
+            bool isNewStudent =
+                newStudents.Contains(score.Student);
+
+            Color textColor =
+                isNewStudent
+                    ? UiConstants.NewStudentColor
+                    : SystemColors.ControlText;
 
             AddLabel(
                 score.Student,
                 0,
-                row + 1);
+                row,
+                AnchorStyles.Left,
+                FontStyle.Regular,
+                textColor);
 
             AddLabel(
                 score.Score.ToString(),
                 1,
-                row + 1,
-                AnchorStyles.Right);
+                row,
+                AnchorStyles.Right,
+                FontStyle.Regular,
+                textColor);
+
+            row++;
         }
     }
 
@@ -96,7 +122,8 @@ public class QuizScorePane : DisplayPane
         int column,
         int row,
         AnchorStyles anchor = AnchorStyles.Left,
-        FontStyle fontStyle = FontStyle.Regular)
+        FontStyle fontStyle = FontStyle.Regular,
+        Color? foreColor = null)
     {
         Label label = new()
         {
@@ -104,6 +131,7 @@ public class QuizScorePane : DisplayPane
             AutoSize = true,
             Anchor = anchor,
             Padding = new Padding(4),
+            ForeColor = foreColor ?? SystemColors.ControlText,
             Font = new Font(
                 Font.FontFamily,
                 Font.Size,

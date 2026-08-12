@@ -14,6 +14,8 @@ public class UploadScorePane : WorkPane
 
     private const string DescriptionKey = "Description";
 
+    private const string QuizDateKey = "QuizDate";
+
     private readonly InputTextBoxGroup nameGroup =
         new(
             labelText: NameKey,
@@ -27,6 +29,11 @@ public class UploadScorePane : WorkPane
         new(
             labelText: "Score File",
             isRequired: true);
+
+    private readonly InputDateGroup dateGroup =
+    new(
+        labelText: "Quiz Date",
+        isRequired: true);
 
     private readonly Button uploadButton = new();
 
@@ -57,6 +64,11 @@ public class UploadScorePane : WorkPane
             row: 0,
             logicalColumn: 1);
 
+        AddInputGroup(
+            dateGroup,
+            row: 1,
+            logicalColumn: 0);
+
         //
         // scoreFileGroup
         //
@@ -70,7 +82,7 @@ public class UploadScorePane : WorkPane
 
         ContentTable.Controls.Add(
             scoreFileGroup.InputControl,
-            0,
+            2,
             1);
 
         ContentTable.SetColumnSpan(
@@ -117,6 +129,8 @@ public class UploadScorePane : WorkPane
             return result;
         }
 
+        DateTime quizDate = dateGroup.Date;
+
         result.AddValue(
             NameKey,
             normalizedName);
@@ -124,6 +138,10 @@ public class UploadScorePane : WorkPane
         result.AddValue(
             DescriptionKey,
             description);
+
+        result.AddValue(
+            QuizDateKey,
+            quizDate);
 
         return result;
     }
@@ -145,6 +163,8 @@ public class UploadScorePane : WorkPane
         string description =
             result.GetValue<string>(DescriptionKey);
 
+        DateTime quizDate = result.GetValue<DateTime>(QuizDateKey);
+
         List<QuizScore> scores = CreateTestScores();
 
         Form? owner = ContentTable.FindForm();
@@ -159,6 +179,7 @@ public class UploadScorePane : WorkPane
                     ClassName,
                     name,
                     description,
+                    quizDate,
                     scores);
             }
             catch (IOException ex)
