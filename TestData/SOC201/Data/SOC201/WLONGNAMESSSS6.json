@@ -139,9 +139,5 @@
       "student": "Jack",
       "score": 5
     }
-  ],
-  "stats": {
-    "studentCount": 0,
-    "averageScore": 0
-  }
+  ]
 }

@@ -39,6 +39,7 @@ public class MainForm : Form
     private readonly LeftActionArea leftActionArea = new();
 
     private readonly ClassButtonSet classButtonSet = new();
+    private readonly QuizButtonSet quizButtonSet = new();
 
     private readonly ClassExplorer classExplorer;
 
@@ -270,9 +271,11 @@ public class MainForm : Form
     {
         workPanes.Add(typeof(AddClassPane), new AddClassPane(classManager));
         workPanes.Add(typeof(UploadScorePane), new UploadScorePane(quizManager));
+        workPanes.Add(typeof(EditQuizPane), new EditQuizPane(quizManager));
 
         GetWorkPane<UploadScorePane>().QuizCreated += UploadScorePane_QuizCreated;
         GetWorkPane<AddClassPane>().ClassCreated += AddClassPane_ClassCreated;
+        GetWorkPane<EditQuizPane>().QuizUpdated += EditQuizPane_QuizUpdated;
 
     }
 
@@ -291,6 +294,15 @@ public class MainForm : Form
     {
         classButtonSet.UploadScoreButton.Click +=
             UploadQuizButton_Click;
+
+        // quizButtonSet.UpdateScoreButton.Click +=
+        //     UpdateScoreButton_Click;
+
+        quizButtonSet.EditButton.Click +=
+            EditQuizButton_Click;
+
+        quizButtonSet.DeleteButton.Click +=
+            DeleteQuizButton_Click;
     }
 
     private void CreateButton_Click(
@@ -366,7 +378,9 @@ public class MainForm : Form
                     break;
 
                 case ClassExplorerSelectionType.Quiz:
-                    leftActionArea.ClearAll();
+                    leftActionArea.ShowButtons(
+                       quizButtonSet.Buttons);
+
 
                     ShowClassInfo(
                         classManager.Classes[
@@ -558,5 +572,85 @@ public class MainForm : Form
             className,
             pane.Summary,
             dialog.FileName);
+    }
+
+    private void DeleteQuizButton_Click(
+        object? sender, EventArgs e)
+    {
+        string className =
+            classExplorer.SelectedClassName;
+
+        string quizName =
+            classExplorer.SelectedName;
+
+        DialogResult result = MessageBox.Show(
+            this,
+            $"Are you sure you want to delete the quiz \"{quizName}\"?",
+            "Delete Quiz",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Warning,
+            MessageBoxDefaultButton.Button2);
+
+        if (result != DialogResult.Yes)
+        {
+            return;
+        }
+
+        DeleteQuiz(
+            className,
+            quizName);
+
+        RefreshData();
+
+        classExplorer.SelectClass(className);
+    }
+
+    private void EditQuizButton_Click(
+        object? sender, EventArgs e)
+    {
+        string className =
+            classExplorer.SelectedClassName;
+
+        string quizName =
+            classExplorer.SelectedName;
+
+        QuizInfo? quizInfo =
+            quizManager.GetQuiz(
+                className,
+                quizName);
+
+        if (quizInfo is null)
+        {
+            return;
+        }
+
+        EditQuizPane editQuizPane = GetWorkPane<EditQuizPane>();
+
+        editQuizPane.ClassName = className;
+        editQuizPane.SetData(quizInfo);
+
+        ShowWorkPane<EditQuizPane>();
+    }
+
+    private void EditQuizPane_QuizUpdated(
+        object? sender, EventArgs e)
+    {
+        if (sender is not EditQuizPane pane)
+        {
+            return;
+        }
+
+        string className =
+            classExplorer.SelectedClassName;
+
+        string quizName =
+            classExplorer.SelectedName;
+
+        RefreshData();
+
+        workArea.Clear();
+
+        classExplorer.SelectQuiz(
+            className, pane.UpdatedQuizName);
     }
 }

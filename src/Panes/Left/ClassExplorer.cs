@@ -229,4 +229,45 @@ public class ClassExplorer : UserControl
         }
     }
 
+    public void SelectClass(string className)
+    {
+        foreach (TreeNode classNode in treeView.Nodes)
+        {
+            if (classNode.Text.Equals(
+                className,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                treeView.Focus();
+                treeView.SelectedNode = classNode;
+                return;
+            }
+        }
+    }
+
+    public void SelectQuiz(string className, string quizName)
+    {
+        foreach (TreeNode classNode in treeView.Nodes)
+        {
+            if (!classNode.Text.Equals(
+                className,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            foreach (TreeNode quizNode in classNode.Nodes)
+            {
+                if (quizNode.Text.Equals(
+                    quizName,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    treeView.Focus();
+                    treeView.SelectedNode = quizNode;
+                    return;
+                }
+            }
+
+            return;
+        }
+    }
 }

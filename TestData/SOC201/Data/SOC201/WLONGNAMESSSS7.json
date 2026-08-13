@@ -135,9 +135,5 @@
       "student": "Caleb",
       "score": 14
     }
-  ],
-  "stats": {
-    "studentCount": 0,
-    "averageScore": 0
-  }
+  ]
 }

@@ -163,9 +163,5 @@
       "student": "Fiona",
       "score": 20
     }
-  ],
-  "stats": {
-    "studentCount": 0,
-    "averageScore": 0
-  }
+  ]
 }

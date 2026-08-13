@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using PointTool.Utilities;
 using static PointTool.Managers.ClassManager;
 using static PointTool.Panes.Work.UploadScorePane;
@@ -361,6 +362,79 @@ public class QuizManager(ClassManager classManager)
         }
     }
 
+    public static void DeleteQuiz(string className, string quizName)
+    {
+        string classDirectory = Path.Combine(
+            PathManager.GetDataDirectory(),
+            className);
+
+        string filePath = Path.Combine(
+            classDirectory, $"{quizName}.json");
+
+        File.Delete(filePath);
+    }
+
+    public void UpdateQuiz(string className, string currentName,
+        string name, string description, DateTime quizDate)
+    {
+        QuizInfo? quizInfo =
+            GetQuiz(className, currentName);
+
+        if (quizInfo is null)
+        {
+            throw new IOException(
+                $"Quiz \"{currentName}\" was not found for class \"{className}\".");
+        }
+
+        if (!currentName.Equals(
+            name, StringComparison.OrdinalIgnoreCase))
+        {
+            QuizInfo? existingQuiz =
+                GetQuiz(className, name);
+
+            if (existingQuiz is not null)
+            {
+                throw new IOException(
+                    $"Quiz \"{name}\" already exists for class \"{className}\".");
+            }
+        }
+
+        string classDirectory = Path.Combine(
+            PathManager.GetDataDirectory(),
+            className);
+
+        string currentFilePath = Path.Combine(
+            classDirectory,
+            $"{currentName}.json");
+
+        string newFilePath = Path.Combine(
+            classDirectory,
+            $"{name}.json");
+
+        QuizInfo updatedQuizInfo = new()
+        {
+            Name = name,
+            Description = description,
+            QuizDate = quizDate,
+            Scores = quizInfo.Scores,
+        };
+
+        string json = JsonSerializer.Serialize(
+            updatedQuizInfo,
+            JsonOptions.Options);
+
+        File.WriteAllText(
+            newFilePath,
+            json);
+
+        if (!currentFilePath.Equals(
+            newFilePath,
+            StringComparison.OrdinalIgnoreCase))
+        {
+            File.Delete(currentFilePath);
+        }
+    }
+
     public class QuizInfo
     {
         public string Name { get; init; } = string.Empty;
@@ -371,6 +445,7 @@ public class QuizManager(ClassManager classManager)
 
         public DateTime QuizDate { get; init; }
 
+        [JsonIgnore]
         public QuizStats Stats { get; set; } = new();
     }
 

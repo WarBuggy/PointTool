@@ -123,9 +123,5 @@
       "student": "Charlie",
       "score": 7
     }
-  ],
-  "stats": {
-    "studentCount": 0,
-    "averageScore": 0
-  }
+  ]
 }

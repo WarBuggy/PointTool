@@ -143,9 +143,5 @@
       "student": "Xavier",
       "score": 15
     }
-  ],
-  "stats": {
-    "studentCount": 0,
-    "averageScore": 0
-  }
+  ]
 }

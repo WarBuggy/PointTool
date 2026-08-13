@@ -155,9 +155,5 @@
       "student": "Ethan",
       "score": 1
     }
-  ],
-  "stats": {
-    "studentCount": 0,
-    "averageScore": 0
-  }
+  ]
 }
