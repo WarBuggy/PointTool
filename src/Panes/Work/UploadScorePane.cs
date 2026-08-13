@@ -210,7 +210,7 @@ public class UploadScorePane : WorkPane
         }
     }
 
-    private static List<QuizScore> CreateTestScores()
+    public static List<QuizScore> CreateTestScores()
     {
         string[] students =
         [

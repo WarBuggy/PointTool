@@ -295,8 +295,8 @@ public class MainForm : Form
         classButtonSet.UploadScoreButton.Click +=
             UploadQuizButton_Click;
 
-        // quizButtonSet.UpdateScoreButton.Click +=
-        //     UpdateScoreButton_Click;
+        quizButtonSet.UpdateScoreButton.Click +=
+            UpdateScoreButton_Click;
 
         quizButtonSet.EditButton.Click +=
             EditQuizButton_Click;
@@ -596,9 +596,7 @@ public class MainForm : Form
             return;
         }
 
-        DeleteQuiz(
-            className,
-            quizName);
+        quizManager.DeleteQuiz(className, quizName);
 
         RefreshData();
 
@@ -652,5 +650,39 @@ public class MainForm : Form
 
         classExplorer.SelectQuiz(
             className, pane.UpdatedQuizName);
+    }
+
+    private void UpdateScoreButton_Click(
+        object? sender, EventArgs e)
+    {
+        string className =
+            classExplorer.SelectedClassName;
+
+        string quizName =
+            classExplorer.SelectedName;
+
+        using OpenFileDialog dialog = new();
+        dialog.Title = "Select New Score File";
+        dialog.Filter = "Score files (*.xlsx)|*.xlsx";
+
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        try
+        {
+            quizManager.UpdateQuizScores(
+                className, quizName);
+
+            RefreshData();
+        }
+        catch (IOException ex)
+        {
+            UIUtilities.ShowMessage(
+                "Update Scores",
+                ex.Message,
+                this);
+        }
     }
 }

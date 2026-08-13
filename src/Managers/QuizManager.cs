@@ -362,7 +362,7 @@ public class QuizManager(ClassManager classManager)
         }
     }
 
-    public static void DeleteQuiz(string className, string quizName)
+    public void DeleteQuiz(string className, string quizName)
     {
         string classDirectory = Path.Combine(
             PathManager.GetDataDirectory(),
@@ -372,6 +372,14 @@ public class QuizManager(ClassManager classManager)
             classDirectory, $"{quizName}.json");
 
         File.Delete(filePath);
+
+        if (quizzes.TryGetValue(className, out List<QuizInfo>? quizList))
+        {
+            quizList.RemoveAll(quiz =>
+                quiz.Name.Equals(
+                    quizName,
+                    StringComparison.OrdinalIgnoreCase));
+        }
     }
 
     public void UpdateQuiz(string className, string currentName,
@@ -433,6 +441,28 @@ public class QuizManager(ClassManager classManager)
         {
             File.Delete(currentFilePath);
         }
+    }
+
+    public void UpdateQuizScores(string className, string quizName)
+    {
+        QuizInfo? quizInfo = GetQuiz(className, quizName);
+
+        if (quizInfo is null)
+        {
+            throw new IOException(
+                $"Quiz \"{quizName}\" was not found for class \"{className}\".");
+        }
+
+        DeleteQuiz(className, quizName);
+
+        var scores = CreateTestScores();
+
+        CreateQuizScoreFile(
+            className,
+            quizInfo.Name,
+            quizInfo.Description,
+            quizInfo.QuizDate,
+            scores);
     }
 
     public class QuizInfo
