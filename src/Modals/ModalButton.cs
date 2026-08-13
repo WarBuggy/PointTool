@@ -9,4 +9,6 @@ public sealed class ModalButton
     public bool IsDefault { get; init; }
 
     public bool IsCancel { get; init; }
+
+    public Action<Button>? Action { get; init; }
 }

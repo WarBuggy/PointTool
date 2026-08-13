@@ -37,14 +37,16 @@ public class CustomMessageModal : BaseModal
         string text,
         DialogResult result,
         bool isDefault = false,
-        bool isCancel = false)
+        bool isCancel = false,
+        Action<Button>? action = null)
     {
         buttons.Add(new ModalButton
         {
             Text = text,
             Result = result,
             IsDefault = isDefault,
-            IsCancel = isCancel
+            IsCancel = isCancel,
+            Action = action,
         });
     }
 
@@ -117,9 +119,14 @@ public class CustomMessageModal : BaseModal
             {
                 Text = modalButton.Text,
                 DialogResult = modalButton.Result,
-                Size = new Size(
-                    UiConstants.ButtonWidth,
-                    UiConstants.ButtonHeight)
+                AutoSize = true,
+                MinimumSize = new Size(
+                    UiConstants.ButtonWidth, UiConstants.ButtonHeight),
+            };
+
+            button.Click += (_, _) =>
+            {
+                modalButton.Action?.Invoke(button);
             };
 
             buttonTable.Controls.Add(button, i, 0);

@@ -272,17 +272,18 @@ public class MainForm : Form
         workPanes.Add(typeof(AddClassPane), new AddClassPane(classManager));
         workPanes.Add(typeof(UploadScorePane), new UploadScorePane(quizManager));
         workPanes.Add(typeof(EditQuizPane), new EditQuizPane(quizManager));
+        workPanes.Add(typeof(CheckNamePane), new CheckNamePane(quizManager));
 
         GetWorkPane<UploadScorePane>().QuizCreated += UploadScorePane_QuizCreated;
         GetWorkPane<AddClassPane>().ClassCreated += AddClassPane_ClassCreated;
         GetWorkPane<EditQuizPane>().QuizUpdated += EditQuizPane_QuizUpdated;
-
     }
 
     private void CreateLeftPane()
     {
 
         createClassButton.Click += CreateButton_Click;
+        classButtonSet.CheckNamesButton.Click += CheckNamesButton_Click;
 
         classExplorer.SelectionChanged +=
             ClassExplorer_SelectionChanged;
@@ -684,5 +685,17 @@ public class MainForm : Form
                 ex.Message,
                 this);
         }
+    }
+
+    private void CheckNamesButton_Click(
+        object? sender, EventArgs e)
+    {
+        CheckNamePane checkNamePane =
+            GetWorkPane<CheckNamePane>();
+
+        checkNamePane.ClassName =
+            classExplorer.SelectedClassName;
+
+        ShowWorkPane<CheckNamePane>();
     }
 }

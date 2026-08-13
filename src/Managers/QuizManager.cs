@@ -465,6 +465,41 @@ public class QuizManager(ClassManager classManager)
             scores);
     }
 
+    private QuizInfo? GetPreviousQuiz(string className, DateTime date)
+    {
+        return GetQuizzes(className)
+            .Where(quiz => quiz.QuizDate < date)
+            .OrderByDescending(quiz => quiz.QuizDate)
+            .FirstOrDefault();
+    }
+
+    public List<string> FindNewStudents(
+        string className, DateTime date, List<QuizScore> scores)
+    {
+        QuizInfo? previousQuiz =
+            GetPreviousQuiz(
+                className,
+                date);
+
+        if (previousQuiz is null)
+        {
+            return [.. scores
+            .Select(score => score.Student)
+            .Distinct(StringComparer.OrdinalIgnoreCase)];
+        }
+
+        HashSet<string> knownStudents =
+        [
+            .. previousQuiz.Stats.PreviousStudents,
+            .. previousQuiz.Stats.NewStudents
+        ];
+
+        return [.. scores
+            .Select(score => score.Student)
+            .Where(student => !knownStudents.Contains(student))
+            .Distinct(StringComparer.OrdinalIgnoreCase)];
+    }
+
     public class QuizInfo
     {
         public string Name { get; init; } = string.Empty;

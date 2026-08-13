@@ -2,7 +2,7 @@ namespace PointTool.Panes.Left;
 
 public class ClassButtonSet
 {
-    private readonly Button exportButton = new();
+    private readonly Button checkNamesButton = new();
 
     private readonly Button editButton = new();
 
@@ -14,15 +14,15 @@ public class ClassButtonSet
 
     public ClassButtonSet()
     {
-        exportButton.Text = "Export scores";
+        checkNamesButton.Text = "Check names";
         editButton.Text = "Edit class";
         uploadScoreButton.Text = "Upload scores";
         archiveButton.Text = "Archive class";
 
         foreach (Button button in new[]
         {
+            checkNamesButton,
             uploadScoreButton,
-            exportButton,
             editButton,
             archiveButton,
         })
@@ -33,19 +33,18 @@ public class ClassButtonSet
 
         Buttons =
         [
+            checkNamesButton,
             uploadScoreButton,
-            exportButton,
             editButton,
             archiveButton,
         ];
     }
 
-    public Button ExportButton => exportButton;
+    public Button CheckNamesButton => checkNamesButton;
 
     public Button EditButton => editButton;
 
     public Button UploadScoreButton => uploadScoreButton;
 
     public Button ArchiveButton => archiveButton;
-
 }
