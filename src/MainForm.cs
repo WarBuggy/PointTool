@@ -296,6 +296,9 @@ public class MainForm : Form
         classButtonSet.UploadScoreButton.Click +=
             UploadQuizButton_Click;
 
+        classButtonSet.ArchiveButton.Click +=
+            ArchiveClassButton_Click;
+
         quizButtonSet.UpdateScoreButton.Click +=
             UpdateScoreButton_Click;
 
@@ -697,5 +700,98 @@ public class MainForm : Form
             classExplorer.SelectedClassName;
 
         ShowWorkPane<CheckNamePane>();
+    }
+
+    private void ArchiveClassButton_Click(
+        object? sender, EventArgs e)
+    {
+        Form modal = new()
+        {
+            Text = "Archive Class",
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            MaximizeBox = false,
+            MinimizeBox = false,
+            StartPosition = FormStartPosition.CenterParent,
+            ShowInTaskbar = false,
+        };
+
+        TableLayoutPanel table = new()
+        {
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Dock = DockStyle.Fill,
+            Padding = new Padding(12),
+            ColumnCount = 1,
+            RowCount = 2,
+        };
+
+        table.RowStyles.Add(
+            new RowStyle(SizeType.AutoSize));
+
+        table.RowStyles.Add(
+            new RowStyle(SizeType.AutoSize));
+
+        Label messageLabel = new()
+        {
+            Text =
+            "Classes that are no longer current and will not receive new quiz scores"
+            + Environment.NewLine
+            + "can be archived to keep the class explorer clear."
+            + Environment.NewLine
+            + Environment.NewLine
+            + "To archive classes:"
+            + Environment.NewLine
+            + Environment.NewLine
+            + "1. Remember the class names."
+            + Environment.NewLine
+            + "2. Close PointTool."
+            + Environment.NewLine
+            + "3. Move the class folders out of the Data folder."
+            + Environment.NewLine
+            + "   The Archive folder, next to Data, is a convenient place,"
+            + Environment.NewLine
+            + "   but you can use any location you remember."
+            + Environment.NewLine
+            + "4. Start PointTool again."
+            + Environment.NewLine
+            + Environment.NewLine
+            + "The archived classes will no longer appear in the class explorer."
+            + Environment.NewLine
+            + Environment.NewLine
+            + "To restore archived classes, close PointTool and move their"
+            + Environment.NewLine
+            + "folders back into the Data folder.",
+            AutoSize = true,
+        };
+
+        Button okButton = new()
+        {
+            Text = "OK",
+            DialogResult = DialogResult.OK,
+            Size = new Size(
+                UiConstants.ButtonWidth,
+                UiConstants.ButtonHeight),
+            Anchor = AnchorStyles.Right,
+        };
+
+        table.Controls.Add(
+            messageLabel,
+            0,
+            0);
+
+        table.Controls.Add(
+            okButton,
+            0,
+            1);
+
+        modal.Controls.Add(table);
+
+        modal.AcceptButton = okButton;
+        modal.CancelButton = okButton;
+
+        modal.ShowDialog(this);
+        modal.Dispose();
     }
 }
