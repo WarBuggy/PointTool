@@ -55,6 +55,8 @@ public class MainForm : Form
 
     private readonly Dictionary<Type, WorkPane> workPanes = [];
 
+    private readonly string ArchiveFolderName = "Archive";
+
     public MainForm()
     {
         settingManager = new();
@@ -243,6 +245,8 @@ public class MainForm : Form
 
             return;
         }
+
+        CreateArchiveDirectory();
 
         ShowClassExplorer();
     }
@@ -750,7 +754,7 @@ public class MainForm : Form
             + Environment.NewLine
             + "3. Move the class folders out of the Data folder."
             + Environment.NewLine
-            + "   The Archive folder, next to Data, is a convenient place,"
+            + "   The " + ArchiveFolderName + " folder, next to Data, is a convenient place,"
             + Environment.NewLine
             + "   but you can use any location you remember."
             + Environment.NewLine
@@ -793,5 +797,27 @@ public class MainForm : Form
 
         modal.ShowDialog(this);
         modal.Dispose();
+    }
+
+    private void CreateArchiveDirectory()
+    {
+        string dataDirectory =
+            PathManager.GetDataDirectory();
+
+        string? parentDirectory =
+            Directory.GetParent(dataDirectory)?.FullName;
+
+        if (parentDirectory is null)
+        {
+            throw new IOException(
+                "The parent directory of the Data folder could not be determined.");
+        }
+
+        string archiveDirectory =
+            Path.Combine(
+                parentDirectory,
+                ArchiveFolderName);
+
+        Directory.CreateDirectory(archiveDirectory);
     }
 }
