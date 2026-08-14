@@ -277,10 +277,12 @@ public class MainForm : Form
         workPanes.Add(typeof(UploadScorePane), new UploadScorePane(quizManager));
         workPanes.Add(typeof(EditQuizPane), new EditQuizPane(quizManager));
         workPanes.Add(typeof(CheckNamePane), new CheckNamePane(quizManager));
+        workPanes.Add(typeof(EditClassPane), new EditClassPane(classManager));
 
         GetWorkPane<UploadScorePane>().QuizCreated += UploadScorePane_QuizCreated;
         GetWorkPane<AddClassPane>().ClassCreated += AddClassPane_ClassCreated;
         GetWorkPane<EditQuizPane>().QuizUpdated += EditQuizPane_QuizUpdated;
+        GetWorkPane<EditClassPane>().ClassUpdated += EditClassPane_ClassUpdated;
     }
 
     private void CreateLeftPane()
@@ -288,6 +290,7 @@ public class MainForm : Form
 
         createClassButton.Click += CreateButton_Click;
         classButtonSet.CheckNamesButton.Click += CheckNamesButton_Click;
+        classButtonSet.EditButton.Click += EditClassButton_Click;
 
         classExplorer.SelectionChanged +=
             ClassExplorer_SelectionChanged;
@@ -820,4 +823,31 @@ public class MainForm : Form
 
         Directory.CreateDirectory(archiveDirectory);
     }
+
+    private void EditClassButton_Click(object? sender, EventArgs e)
+    {
+        string className = classExplorer.SelectedClassName;
+
+        if (!classManager.Classes.TryGetValue(
+            className, out ClassData? classData))
+        {
+            return;
+        }
+
+        EditClassPane editClassPane = GetWorkPane<EditClassPane>();
+
+        editClassPane.LoadClass(className, classData.Info.Description);
+
+        ShowWorkPane<EditClassPane>();
+    }
+
+    private void EditClassPane_ClassUpdated(object? sender, EventArgs e)
+    {
+        EditClassPane editClassPane = GetWorkPane<EditClassPane>();
+
+        RefreshData();
+
+        classExplorer.SelectClass(editClassPane.UpdatedClassName);
+    }
+
 }

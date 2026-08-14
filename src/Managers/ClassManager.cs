@@ -171,6 +171,63 @@ public class ClassManager
         }
     }
 
+    public UpdateClassResult UpdateClass(
+        string currentName, string name, string description)
+    {
+        if (!currentName.Equals(name, StringComparison.OrdinalIgnoreCase)
+            && Classes.ContainsKey(name))
+        {
+            return new UpdateClassResult
+            {
+                Success = false,
+                Message = $"Class \"{name}\" already exists."
+            };
+        }
+
+        try
+        {
+            string dataDirectory =
+                PathManager.GetDataDirectory();
+
+            string currentDirectory =
+                Path.Combine(
+                    dataDirectory,
+                    currentName);
+
+            string newDirectory =
+                Path.Combine(
+                    dataDirectory,
+                    name);
+
+            if (!currentName.Equals(
+                    name, StringComparison.OrdinalIgnoreCase))
+            {
+                Directory.Move(currentDirectory, newDirectory);
+            }
+
+            CreateClassInfoFile(
+                newDirectory,
+                name,
+                description);
+
+            Refresh();
+
+            return new UpdateClassResult
+            {
+                Success = true,
+                Message = $"Class \"{name}\" was updated successfully."
+            };
+        }
+        catch (Exception ex)
+        {
+            return new UpdateClassResult
+            {
+                Success = false,
+                Message = $"Failed to update class \"{name}\".\n\n{ex.Message}"
+            };
+        }
+    }
+
     public class ClassInfo
     {
         public string Name { get; init; } = string.Empty;
@@ -196,5 +253,12 @@ public class ClassManager
         public ClassInfo Info { get; } = classInfo;
 
         public ClassStats Stats { get; set; } = new();
+    }
+
+    public class UpdateClassResult
+    {
+        public bool Success { get; init; }
+
+        public string Message { get; init; } = string.Empty;
     }
 }
